@@ -39,13 +39,13 @@ class TestReadPreferencesBase(TestReplicaSetClientBase):
         super(TestReadPreferencesBase, self).setUp()
         # Insert some data so we can use cursors in read_from_which_host
         c = self._get_client()
-        c.pymongo_test.test.drop()
+        c.pymongo_test.test.really_drop()
         c.pymongo_test.test.insert([{'_id': i} for i in range(10)], w=self.w)
 
     def tearDown(self):
         super(TestReadPreferencesBase, self).tearDown()
         c = self._get_client()
-        c.pymongo_test.test.drop()
+        c.pymongo_test.test.really_drop()
 
     def read_from_which_host(self, client):
         """Do a find() on the client and return which host was used
@@ -385,7 +385,7 @@ class TestCommandAndReadPreference(TestReplicaSetClientBase):
         self._test_fn(False, lambda: self.c.pymongo_test.drop_collection(
             'some_collection'))
 
-        self._test_fn(False, lambda: self.c.pymongo_test.some_collection.drop())
+        self._test_fn(False, lambda: self.c.pymongo_test.some_collection.really_drop())
 
     def test_group(self):
         self._test_fn(True, lambda: self.c.pymongo_test.test.group(

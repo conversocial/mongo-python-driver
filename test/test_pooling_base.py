@@ -266,8 +266,8 @@ class _TestPoolingBase(object):
 
         # reset the db
         db = self.c[DB]
-        db.unique.drop()
-        db.test.drop()
+        db.unique.really_drop()
+        db.test.really_drop()
         db.unique.insert({"_id": "jesse"})
 
         db.test.insert([{} for i in range(10)])

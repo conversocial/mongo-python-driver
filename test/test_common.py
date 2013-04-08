@@ -290,7 +290,7 @@ class TestCommon(unittest.TestCase):
     def test_mongo_client(self):
         m = MongoClient(pair, w=0)
         coll = m.pymongo_test.write_concern_test
-        coll.drop()
+        coll.really_drop()
         doc = {"_id": ObjectId()}
         coll.insert(doc)
         self.assertTrue(coll.insert(doc, safe=False))
@@ -329,7 +329,7 @@ class TestCommon(unittest.TestCase):
             raise SkipTest("Not connected to a replica set.")
         m = MongoReplicaSetClient(pair, replicaSet=setname, w=0)
         coll = m.pymongo_test.write_concern_test
-        coll.drop()
+        coll.really_drop()
         doc = {"_id": ObjectId()}
         coll.insert(doc)
         self.assertTrue(coll.insert(doc, safe=False))

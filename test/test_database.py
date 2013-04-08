@@ -137,9 +137,9 @@ class TestDatabase(unittest.TestCase):
 
         db.test.save({"dummy": u"object"})
         self.assertTrue("test" in db.collection_names())
-        db.test.drop()
+        db.test.really_drop()
         self.assertFalse("test" in db.collection_names())
-        db.test.drop()
+        db.test.really_drop()
 
         db.drop_collection(db.test.doesnotexist)
 

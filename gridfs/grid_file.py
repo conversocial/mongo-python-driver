@@ -153,7 +153,7 @@ class GridIn(object):
         kwargs["_id"] = kwargs.get("_id", ObjectId())
         kwargs["chunkSize"] = kwargs.get("chunkSize", DEFAULT_CHUNK_SIZE)
 
-        root_collection.chunks.ensure_index([("files_id", ASCENDING),
+        root_collection.chunks.really_ensure_index([("files_id", ASCENDING),
                                              ("n", ASCENDING)],
                                             unique=True)
         object.__setattr__(self, "_coll", root_collection)

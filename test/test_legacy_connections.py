@@ -41,7 +41,7 @@ class TestConnection(unittest.TestCase):
         # Connection's writes are unacknowledged by default
         doc = {"_id": ObjectId()}
         coll = c.pymongo_test.write_concern_test
-        coll.drop()
+        coll.really_drop()
         coll.insert(doc)
         coll.insert(doc)
 
@@ -74,7 +74,7 @@ class TestReplicaSetConnection(TestReplicaSetClientBase):
         # ReplicaSetConnection's writes are unacknowledged by default
         doc = {"_id": ObjectId()}
         coll = c.pymongo_test.write_concern_test
-        coll.drop()
+        coll.really_drop()
         coll.insert(doc)
         coll.insert(doc)
 

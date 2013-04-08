@@ -56,7 +56,7 @@ class GridFS(object):
         self.__chunks = self.__collection.chunks
         connection = database.connection
         if not hasattr(connection, 'is_primary') or connection.is_primary:
-            self.__chunks.ensure_index([("files_id", ASCENDING),
+            self.__chunks.really_ensure_index([("files_id", ASCENDING),
                                         ("n", ASCENDING)],
                                        unique=True)
 
@@ -178,7 +178,7 @@ class GridFS(object):
         """
         connection = self.__database.connection
         if not hasattr(connection, 'is_primary') or connection.is_primary:
-            self.__files.ensure_index([("filename", ASCENDING),
+            self.__files.really_ensure_index([("filename", ASCENDING),
                                        ("uploadDate", DESCENDING)])
 
         query = kwargs

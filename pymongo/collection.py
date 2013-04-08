@@ -478,7 +478,7 @@ class Collection(common.BaseObject):
                            spec, document, safe, options,
                            check_keys, self.__uuid_subtype), safe)
 
-    def drop(self):
+    def really_drop(self):
         """Alias for :meth:`~pymongo.database.Database.drop_collection`.
 
         The following two calls are equivalent:
@@ -724,7 +724,7 @@ class Collection(common.BaseObject):
         """
         return self.find().count()
 
-    def create_index(self, key_or_list, cache_for=300, **kwargs):
+    def really_create_index(self, key_or_list, cache_for=300, **kwargs):
         """Creates an index on this collection.
 
         Takes either a single key or a list of (key, direction) pairs.
@@ -827,7 +827,7 @@ class Collection(common.BaseObject):
 
         return name
 
-    def ensure_index(self, key_or_list, cache_for=300, **kwargs):
+    def really_ensure_index(self, key_or_list, cache_for=300, **kwargs):
         """Ensures that an index exists on this collection.
 
         Takes either a single key or a list of (key, direction) pairs.
@@ -913,10 +913,10 @@ class Collection(common.BaseObject):
 
         if not self.__database.connection._cached(self.__database.name,
                                                   self.__name, name):
-            return self.create_index(key_or_list, cache_for, **kwargs)
+            return self.really_create_index(key_or_list, cache_for, **kwargs)
         return None
 
-    def drop_indexes(self):
+    def really_drop_indexes(self):
         """Drops all indexes on this collection.
 
         Can be used on non-existant collections or collections with no indexes.
@@ -924,9 +924,9 @@ class Collection(common.BaseObject):
         """
         self.__database.connection._purge_index(self.__database.name,
                                                 self.__name)
-        self.drop_index(u"*")
+        self.really_drop_index(u"*")
 
-    def drop_index(self, index_or_name):
+    def really_drop_index(self, index_or_name):
         """Drops the specified index on this collection.
 
         Can be used on non-existant collections or collections with no
@@ -957,7 +957,7 @@ class Collection(common.BaseObject):
         self.__database.command("dropIndexes", self.__name, index=name,
                                 allowable_errors=["ns not found"])
 
-    def reindex(self):
+    def really_reindex(self):
         """Rebuilds all indexes on this collection.
 
         .. warning:: reindex blocks all other operations (indexes
@@ -1127,7 +1127,7 @@ class Collection(common.BaseObject):
                                        slave_okay=self.slave_okay,
                                        _use_master=use_master)["retval"]
 
-    def rename(self, new_name, **kwargs):
+    def really_rename(self, new_name, **kwargs):
         """Rename this collection.
 
         If operating in auth mode, client must be authorized as an

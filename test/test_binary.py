@@ -250,7 +250,7 @@ class TestBinary(unittest.TestCase):
 
         c = get_client()
         coll = c.pymongo_test.test
-        coll.drop()
+        coll.really_drop()
 
         uu = uuid.uuid4()
         # Wrap uu.bytes in binary_type to work
@@ -277,7 +277,7 @@ class TestBinary(unittest.TestCase):
         # Test both.
         cur = coll.find({'uuid': {'$in': [uu, UUIDLegacy(uu)]}})
         self.assertEqual(2, cur.count())
-        coll.drop()
+        coll.really_drop()
 
     def test_pickle(self):
         b1 = Binary(b('123'), 2)

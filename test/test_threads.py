@@ -213,7 +213,7 @@ class BaseTestThreads(object):
         self.db.drop_collection("test2")
         self.db.test2.insert({"test": "insert"})
 
-        self.db.test2.create_index("test", unique=True)
+        self.db.test2.really_create_index("test", unique=True)
         self.db.test2.find_one()
 
         okay = Insert(self.db.test1, 2000, False)
@@ -233,7 +233,7 @@ class BaseTestThreads(object):
         self.db.test2.insert({"test": "update"})
         self.db.test2.insert({"test": "unique"})
 
-        self.db.test2.create_index("test", unique=True)
+        self.db.test2.really_create_index("test", unique=True)
         self.db.test2.find_one()
 
         okay = Update(self.db.test1, 2000, False)

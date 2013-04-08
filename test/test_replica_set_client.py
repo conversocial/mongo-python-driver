@@ -263,7 +263,7 @@ class TestReplicaSetClient(TestReplicaSetClientBase, TestRequestMixin):
         self.assertEqual(1, db.test.count())
         db.test.remove({})
         self.assertEqual(0, db.test.count())
-        db.test.drop()
+        db.test.really_drop()
         c.close()
 
     def test_database_names(self):
@@ -310,7 +310,7 @@ class TestReplicaSetClient(TestReplicaSetClientBase, TestRequestMixin):
 
         self.assertRaises(InvalidName, c.copy_database, "foo", "$foo")
 
-        c.pymongo_test.test.drop()
+        c.pymongo_test.test.really_drop()
         c.drop_database("pymongo_test1")
         c.drop_database("pymongo_test2")
 
@@ -690,7 +690,7 @@ class TestReplicaSetClient(TestReplicaSetClientBase, TestRequestMixin):
         pool = c._MongoReplicaSetClient__members[self.primary].pool
         self.assertEqual(1, len(pool.sockets))
         old_sock_info = iter(pool.sockets).next()
-        c.pymongo_test.test.drop()
+        c.pymongo_test.test.really_drop()
         c.pymongo_test.test.insert({'_id': 'foo'})
         self.assertRaises(
             OperationFailure,
@@ -713,7 +713,7 @@ class TestReplicaSetClient(TestReplicaSetClientBase, TestRequestMixin):
         self.assertTrue(isinstance(pool._get_request_state(), SocketInfo))
 
         old_sock_info = pool._get_request_state()
-        c.pymongo_test.test.drop()
+        c.pymongo_test.test.really_drop()
         c.pymongo_test.test.insert({'_id': 'foo'})
         self.assertRaises(
             OperationFailure,

@@ -100,106 +100,106 @@ class TestCollection(unittest.TestCase):
     def test_create_index(self):
         db = self.db
 
-        self.assertRaises(TypeError, db.test.create_index, 5)
-        self.assertRaises(TypeError, db.test.create_index, {"hello": 1})
-        self.assertRaises(ValueError, db.test.create_index, [])
+        self.assertRaises(TypeError, db.test.really_create_index, 5)
+        self.assertRaises(TypeError, db.test.really_create_index, {"hello": 1})
+        self.assertRaises(ValueError, db.test.really_create_index, [])
 
-        db.test.drop_indexes()
+        db.test.really_drop_indexes()
         self.assertEqual(db.system.indexes.find({"ns": u"pymongo_test.test"})
                          .count(), 1)
 
-        db.test.create_index("hello")
-        db.test.create_index([("hello", DESCENDING), ("world", ASCENDING)])
+        db.test.really_create_index("hello")
+        db.test.really_create_index([("hello", DESCENDING), ("world", ASCENDING)])
 
         count = 0
         for _ in db.system.indexes.find({"ns": u"pymongo_test.test"}):
             count += 1
         self.assertEqual(count, 3)
 
-        db.test.drop_indexes()
-        ix = db.test.create_index([("hello", DESCENDING),
+        db.test.really_drop_indexes()
+        ix = db.test.really_create_index([("hello", DESCENDING),
                                    ("world", ASCENDING)], name="hello_world")
         self.assertEqual(ix, "hello_world")
 
-        db.test.drop_indexes()
+        db.test.really_drop_indexes()
         self.assertEqual(db.system.indexes.find({"ns": u"pymongo_test.test"})
                          .count(), 1)
-        db.test.create_index("hello")
+        db.test.really_create_index("hello")
         self.assertTrue(u"hello_1" in
                         [a["name"] for a in db.system.indexes
                          .find({"ns": u"pymongo_test.test"})])
 
-        db.test.drop_indexes()
+        db.test.really_drop_indexes()
         self.assertEqual(db.system.indexes.find({"ns": u"pymongo_test.test"})
                          .count(), 1)
-        db.test.create_index([("hello", DESCENDING), ("world", ASCENDING)])
+        db.test.really_create_index([("hello", DESCENDING), ("world", ASCENDING)])
         self.assertTrue(u"hello_-1_world_1" in
                         [a["name"] for a in db.system.indexes
                          .find({"ns": u"pymongo_test.test"})])
 
-        db.test.drop()
+        db.test.really_drop()
         db.test.insert({'a': 1})
         db.test.insert({'a': 1})
-        self.assertRaises(DuplicateKeyError, db.test.create_index,
+        self.assertRaises(DuplicateKeyError, db.test.really_create_index,
                                                     'a', unique=True)
 
     def test_ensure_index(self):
         db = self.db
 
-        self.assertRaises(TypeError, db.test.ensure_index, {"hello": 1})
+        self.assertRaises(TypeError, db.test.really_ensure_index, {"hello": 1})
 
-        db.test.drop_indexes()
-        self.assertEqual("hello_1", db.test.create_index("hello"))
-        self.assertEqual("hello_1", db.test.create_index("hello"))
+        db.test.really_drop_indexes()
+        self.assertEqual("hello_1", db.test.really_create_index("hello"))
+        self.assertEqual("hello_1", db.test.really_create_index("hello"))
 
         self.assertEqual("goodbye_1",
-                         db.test.ensure_index("goodbye"))
-        self.assertEqual(None, db.test.ensure_index("goodbye"))
+                         db.test.really_ensure_index("goodbye"))
+        self.assertEqual(None, db.test.really_ensure_index("goodbye"))
 
-        db.test.drop_indexes()
+        db.test.really_drop_indexes()
         self.assertEqual("foo",
-                         db.test.ensure_index("goodbye", name="foo"))
-        self.assertEqual(None, db.test.ensure_index("goodbye", name="foo"))
+                         db.test.really_ensure_index("goodbye", name="foo"))
+        self.assertEqual(None, db.test.really_ensure_index("goodbye", name="foo"))
 
-        db.test.drop_indexes()
+        db.test.really_drop_indexes()
         self.assertEqual("goodbye_1",
-                         db.test.ensure_index("goodbye"))
-        self.assertEqual(None, db.test.ensure_index("goodbye"))
+                         db.test.really_ensure_index("goodbye"))
+        self.assertEqual(None, db.test.really_ensure_index("goodbye"))
 
-        db.test.drop_index("goodbye_1")
+        db.test.really_drop_index("goodbye_1")
         self.assertEqual("goodbye_1",
-                         db.test.ensure_index("goodbye"))
-        self.assertEqual(None, db.test.ensure_index("goodbye"))
+                         db.test.really_ensure_index("goodbye"))
+        self.assertEqual(None, db.test.really_ensure_index("goodbye"))
 
         db.drop_collection("test")
         self.assertEqual("goodbye_1",
-                         db.test.ensure_index("goodbye"))
-        self.assertEqual(None, db.test.ensure_index("goodbye"))
+                         db.test.really_ensure_index("goodbye"))
+        self.assertEqual(None, db.test.really_ensure_index("goodbye"))
 
-        db.test.drop_index("goodbye_1")
+        db.test.really_drop_index("goodbye_1")
         self.assertEqual("goodbye_1",
-                         db.test.create_index("goodbye"))
-        self.assertEqual(None, db.test.ensure_index("goodbye"))
+                         db.test.really_create_index("goodbye"))
+        self.assertEqual(None, db.test.really_ensure_index("goodbye"))
 
-        db.test.drop_index("goodbye_1")
+        db.test.really_drop_index("goodbye_1")
         self.assertEqual("goodbye_1",
-                         db.test.ensure_index("goodbye", cache_for=1))
+                         db.test.really_ensure_index("goodbye", cache_for=1))
         time.sleep(1.1)
         self.assertEqual("goodbye_1",
-                         db.test.ensure_index("goodbye"))
+                         db.test.really_ensure_index("goodbye"))
 
-        db.test.drop_index("goodbye_1")
+        db.test.really_drop_index("goodbye_1")
         self.assertEqual("goodbye_1",
-                         db.test.create_index("goodbye", cache_for=1))
+                         db.test.really_create_index("goodbye", cache_for=1))
         time.sleep(1.1)
         self.assertEqual("goodbye_1",
-                         db.test.ensure_index("goodbye"))
+                         db.test.really_ensure_index("goodbye"))
         # Make sure the expiration time is updated.
         self.assertEqual(None,
-                         db.test.ensure_index("goodbye"))
+                         db.test.really_ensure_index("goodbye"))
 
         # Clean up indexes for later tests
-        db.test.drop_indexes()
+        db.test.really_drop_indexes()
 
     def test_deprecated_ttl_index_kwarg(self):
         db = self.db
@@ -209,23 +209,23 @@ class TestCollection(unittest.TestCase):
         # we must test raising errors before the ignore filter is applied.
         warnings.simplefilter("error", DeprecationWarning)
         self.assertRaises(DeprecationWarning, lambda:
-                        db.test.ensure_index("goodbye", ttl=10))
+                        db.test.really_ensure_index("goodbye", ttl=10))
         warnings.resetwarnings()
         warnings.simplefilter("ignore")
 
         self.assertEqual("goodbye_1",
-                         db.test.ensure_index("goodbye", ttl=10))
-        self.assertEqual(None, db.test.ensure_index("goodbye"))
+                         db.test.really_ensure_index("goodbye", ttl=10))
+        self.assertEqual(None, db.test.really_ensure_index("goodbye"))
 
     def test_ensure_unique_index_threaded(self):
         coll = self.db.test_unique_threaded
-        coll.drop()
+        coll.really_drop()
         coll.insert(({'foo': i} for i in xrange(10000)))
 
         class Indexer(threading.Thread):
             def run(self):
                 try:
-                    coll.ensure_index('foo', unique=True)
+                    coll.really_ensure_index('foo', unique=True)
                     coll.insert({'foo': 'bar'})
                     coll.insert({'foo': 'bar'})
                 except OperationFailure:
@@ -243,7 +243,7 @@ class TestCollection(unittest.TestCase):
         joinall(threads)
 
         self.assertEqual(10001, coll.count())
-        coll.drop()
+        coll.really_drop()
 
     def test_index_on_binary(self):
         db = self.db
@@ -255,34 +255,34 @@ class TestCollection(unittest.TestCase):
         self.assertEqual(db.test.find({"bin": Binary(b("abc"))})
                          .explain()["nscanned"], 3)
 
-        db.test.create_index("bin")
+        db.test.really_create_index("bin")
         self.assertEqual(db.test.find({"bin": Binary(b("abc"))})
                          .explain()["nscanned"], 1)
 
     def test_drop_index(self):
         db = self.db
-        db.test.drop_indexes()
-        db.test.create_index("hello")
-        name = db.test.create_index("goodbye")
+        db.test.really_drop_indexes()
+        db.test.really_create_index("hello")
+        name = db.test.really_create_index("goodbye")
 
         self.assertEqual(db.system.indexes.find({"ns": u"pymongo_test.test"})
                          .count(), 3)
         self.assertEqual(name, "goodbye_1")
-        db.test.drop_index(name)
+        db.test.really_drop_index(name)
         self.assertEqual(db.system.indexes.find({"ns": u"pymongo_test.test"})
                          .count(), 2)
         self.assertTrue(u"hello_1" in
                         [a["name"] for a in db.system.indexes
                          .find({"ns": u"pymongo_test.test"})])
 
-        db.test.drop_indexes()
-        db.test.create_index("hello")
-        name = db.test.create_index("goodbye")
+        db.test.really_drop_indexes()
+        db.test.really_create_index("hello")
+        name = db.test.really_create_index("goodbye")
 
         self.assertEqual(db.system.indexes.find({"ns": u"pymongo_test.test"})
                          .count(), 3)
         self.assertEqual(name, "goodbye_1")
-        db.test.drop_index([("goodbye", ASCENDING)])
+        db.test.really_drop_index([("goodbye", ASCENDING)])
         self.assertEqual(db.system.indexes.find({"ns": u"pymongo_test.test"})
                          .count(), 2)
         self.assertTrue(u"hello_1" in
@@ -293,9 +293,9 @@ class TestCollection(unittest.TestCase):
         db = self.db
         db.drop_collection("test")
         db.test.insert({"foo": "bar", "who": "what", "when": "how"})
-        db.test.create_index("foo")
-        db.test.create_index("who")
-        db.test.create_index("when")
+        db.test.really_create_index("foo")
+        db.test.really_create_index("who")
+        db.test.really_create_index("when")
         info = db.test.index_information()
 
         def check_result(result):
@@ -308,7 +308,7 @@ class TestCollection(unittest.TestCase):
             for key in info:
                 self.assertTrue(key in names)
 
-        reindexed = db.test.reindex()
+        reindexed = db.test.really_reindex()
         if 'raw' in reindexed:
             # mongos
             for result in reindexed['raw'].itervalues():
@@ -318,18 +318,18 @@ class TestCollection(unittest.TestCase):
 
     def test_index_info(self):
         db = self.db
-        db.test.drop_indexes()
+        db.test.really_drop_indexes()
         db.test.remove({})
         db.test.save({})  # create collection
         self.assertEqual(len(db.test.index_information()), 1)
         self.assertTrue("_id_" in db.test.index_information())
 
-        db.test.create_index("hello")
+        db.test.really_create_index("hello")
         self.assertEqual(len(db.test.index_information()), 2)
         self.assertEqual(db.test.index_information()["hello_1"]["key"],
                          [("hello", ASCENDING)])
 
-        db.test.create_index([("hello", DESCENDING), ("world", ASCENDING)],
+        db.test.really_create_index([("hello", DESCENDING), ("world", ASCENDING)],
                              unique=True)
         self.assertEqual(db.test.index_information()["hello_1"]["key"],
                          [("hello", ASCENDING)])
@@ -342,8 +342,8 @@ class TestCollection(unittest.TestCase):
 
     def test_index_geo2d(self):
         db = self.db
-        db.test.drop_indexes()
-        self.assertEqual('loc_2d', db.test.create_index([("loc", GEO2D)]))
+        db.test.really_drop_indexes()
+        self.assertEqual('loc_2d', db.test.really_create_index([("loc", GEO2D)]))
         index_info = db.test.index_information()['loc_2d']
         self.assertEqual([('loc', '2d')], index_info['key'])
 
@@ -351,7 +351,7 @@ class TestCollection(unittest.TestCase):
         if is_mongos(self.db.connection):
             raise SkipTest("geoSearch is not supported by mongos")
         db = self.db
-        db.test.drop_indexes()
+        db.test.really_drop_indexes()
         db.test.remove()
         _id = db.test.insert({
             "pos": {"long": 34.2, "lat": 33.3},
@@ -363,7 +363,7 @@ class TestCollection(unittest.TestCase):
         db.test.insert({
             "pos": {"long": 59.1, "lat": 87.2}, "type": "office"
         })
-        db.test.create_index(
+        db.test.really_create_index(
             [("pos", GEOHAYSTACK), ("type", ASCENDING)],
             bucket_size=1
         )
@@ -394,11 +394,11 @@ class TestCollection(unittest.TestCase):
                                   textSearchEnabled=True)
 
         db = self.db
-        db.test.drop_indexes()
-        self.assertEqual("t_text", db.test.create_index([("t", "text")]))
+        db.test.really_drop_indexes()
+        self.assertEqual("t_text", db.test.really_create_index([("t", "text")]))
         index_info = db.test.index_information()["t_text"]
         self.assertTrue("weights" in index_info)
-        db.test.drop_indexes()
+        db.test.really_drop_indexes()
 
         self.client.admin.command('setParameter', '*',
                                   textSearchEnabled=False)
@@ -408,9 +408,9 @@ class TestCollection(unittest.TestCase):
             raise SkipTest("2dsphere indexing requires server >=2.3.2.")
 
         db = self.db
-        db.test.drop_indexes()
+        db.test.really_drop_indexes()
         self.assertEqual("geo_2dsphere",
-                         db.test.create_index([("geo", GEOSPHERE)]))
+                         db.test.really_create_index([("geo", GEOSPHERE)]))
 
         poly = {"type": "Polygon",
                 "coordinates": [[[40,5], [40,6], [41,6], [41,5], [40,5]]]}
@@ -418,33 +418,33 @@ class TestCollection(unittest.TestCase):
 
         self.assertEqual("S2Cursor",
                          db.test.find(query).explain()['cursor'])
-        db.test.drop_indexes()
+        db.test.really_drop_indexes()
 
     def test_index_hashed(self):
         if not version.at_least(self.client, (2, 3, 2)):
             raise SkipTest("hashed indexing requires server >=2.3.2.")
 
         db = self.db
-        db.test.drop_indexes()
+        db.test.really_drop_indexes()
         self.assertEqual("a_hashed",
-                         db.test.create_index([("a", HASHED)]))
+                         db.test.really_create_index([("a", HASHED)]))
 
         self.assertEqual("BtreeCursor a_hashed",
                 db.test.find({'a': 1}).explain()['cursor'])
-        db.test.drop_indexes()
+        db.test.really_drop_indexes()
 
     def test_index_sparse(self):
         db = self.db
-        db.test.drop_indexes()
-        db.test.create_index([('key', ASCENDING)], sparse=True)
+        db.test.really_drop_indexes()
+        db.test.really_create_index([('key', ASCENDING)], sparse=True)
         self.assertTrue(db.test.index_information()['key_1']['sparse'])
 
     def test_index_background(self):
         db = self.db
-        db.test.drop_indexes()
-        db.test.create_index([('keya', ASCENDING)])
-        db.test.create_index([('keyb', ASCENDING)], background=False)
-        db.test.create_index([('keyc', ASCENDING)], background=True)
+        db.test.really_drop_indexes()
+        db.test.really_create_index([('keya', ASCENDING)])
+        db.test.really_create_index([('keyb', ASCENDING)], background=False)
+        db.test.really_create_index([('keyc', ASCENDING)], background=True)
         self.assertFalse('background' in db.test.index_information()['keya_1'])
         self.assertFalse(db.test.index_information()['keyb_1']['background'])
         self.assertTrue(db.test.index_information()['keyc_1']['background'])
@@ -463,7 +463,7 @@ class TestCollection(unittest.TestCase):
 
         if version.at_least(db.connection, (1, 9, 2)):
             # No error, just drop the duplicate
-            db.test.create_index(
+            db.test.really_create_index(
                 [('i', ASCENDING)],
                 unique=True,
                 drop_dups=True
@@ -473,7 +473,7 @@ class TestCollection(unittest.TestCase):
             # with dropDups shouldn't assert". On Mongo < 1.9.2, the duplicate
             # is dropped & the index created, but an error is thrown.
             def test_create():
-                db.test.create_index(
+                db.test.really_create_index(
                     [('i', ASCENDING)],
                     unique=True,
                     drop_dups=True
@@ -493,7 +493,7 @@ class TestCollection(unittest.TestCase):
 
         # There's a duplicate
         def test_create():
-            db.test.create_index(
+            db.test.really_create_index(
                 [('i', ASCENDING)],
                 unique=True,
                 drop_dups=False
@@ -710,7 +710,7 @@ class TestCollection(unittest.TestCase):
 
     def test_invalid_key_names(self):
         db = self.db
-        db.test.drop()
+        db.test.really_drop()
 
         db.test.insert({"hello": "world"})
         db.test.insert({"hello": {"hello": "world"}})
@@ -759,7 +759,7 @@ class TestCollection(unittest.TestCase):
     def test_insert_multiple_with_duplicate(self):
         db = self.db
         db.drop_collection("test")
-        db.test.ensure_index([('i', ASCENDING)], unique=True)
+        db.test.really_ensure_index([('i', ASCENDING)], unique=True)
 
         # No error
         db.test.insert([{'i': i} for i in range(5, 10)], w=0)
@@ -776,7 +776,7 @@ class TestCollection(unittest.TestCase):
 
         db.drop_collection("test")
         db.write_concern['w'] = 0
-        db.test.ensure_index([('i', ASCENDING)], unique=True)
+        db.test.really_ensure_index([('i', ASCENDING)], unique=True)
 
         # No error
         db.test.insert([{'i': 1}] * 2)
@@ -844,7 +844,7 @@ class TestCollection(unittest.TestCase):
         )
 
         # Safe mode
-        self.db.test.create_index("hello", unique=True)
+        self.db.test.really_create_index("hello", unique=True)
         # No exception, even though we duplicate the first doc's "hello" value
         self.db.test.save({'_id': 'explicit_id', 'hello': 'world'}, w=0)
 
@@ -864,7 +864,7 @@ class TestCollection(unittest.TestCase):
         db = self.db
 
         db.drop_collection("test")
-        db.test.create_index("hello")
+        db.test.really_create_index("hello")
 
         db.test.save({"hello": "world"})
         db.test.save({"hello": "mike"})
@@ -872,7 +872,7 @@ class TestCollection(unittest.TestCase):
         self.assertFalse(db.error())
 
         db.drop_collection("test")
-        db.test.create_index("hello", unique=True)
+        db.test.really_create_index("hello", unique=True)
 
         db.test.save({"hello": "world"})
         db.test.save({"hello": "mike"})
@@ -883,7 +883,7 @@ class TestCollection(unittest.TestCase):
         db = self.db
         db.drop_collection("test")
 
-        db.test.create_index("x", unique=True)
+        db.test.really_create_index("x", unique=True)
 
         db.test.insert({"_id": 1, "x": 1})
         db.test.insert({"_id": 2, "x": 2})
@@ -970,7 +970,7 @@ class TestCollection(unittest.TestCase):
         db.test.insert({"hello": {"a": 4, "b": 10}})
 
         db.drop_collection("test")
-        db.test.create_index("hello.a", unique=True)
+        db.test.really_create_index("hello.a", unique=True)
 
         db.test.insert({"hello": {"a": 4, "b": 5}})
         db.test.insert({"hello": {"a": 7, "b": 2}})
@@ -1037,7 +1037,7 @@ class TestCollection(unittest.TestCase):
         v19 = version.at_least(db.connection, (1, 9))
 
         db.drop_collection("test")
-        db.test.create_index("x", unique=True)
+        db.test.really_create_index("x", unique=True)
 
         db.test.insert({"x": 5})
         id = db.test.insert({"x": 4})
@@ -1103,7 +1103,7 @@ class TestCollection(unittest.TestCase):
     def test_safe_save(self):
         db = self.db
         db.drop_collection("test")
-        db.test.create_index("hello", unique=True)
+        db.test.really_create_index("hello", unique=True)
 
         db.test.save({"hello": "world"})
         db.test.save({"hello": "world"}, w=0)
@@ -1304,7 +1304,7 @@ class TestCollection(unittest.TestCase):
     def test_large_limit(self):
         db = self.db
         db.drop_collection("test_large_limit")
-        db.test_large_limit.create_index([('x', 1)])
+        db.test_large_limit.really_create_index([('x', 1)])
 
         for i in range(2000):
             doc = {"x": i, "y": "mongomongo" * 1000}
@@ -1349,12 +1349,12 @@ class TestCollection(unittest.TestCase):
         db.drop_collection("test")
         db.drop_collection("foo")
 
-        self.assertRaises(TypeError, db.test.rename, 5)
-        self.assertRaises(InvalidName, db.test.rename, "")
-        self.assertRaises(InvalidName, db.test.rename, "te$t")
-        self.assertRaises(InvalidName, db.test.rename, ".test")
-        self.assertRaises(InvalidName, db.test.rename, "test.")
-        self.assertRaises(InvalidName, db.test.rename, "tes..t")
+        self.assertRaises(TypeError, db.test.really_rename, 5)
+        self.assertRaises(InvalidName, db.test.really_rename, "")
+        self.assertRaises(InvalidName, db.test.really_rename, "te$t")
+        self.assertRaises(InvalidName, db.test.really_rename, ".test")
+        self.assertRaises(InvalidName, db.test.really_rename, "test.")
+        self.assertRaises(InvalidName, db.test.really_rename, "tes..t")
 
         self.assertEqual(0, db.test.count())
         self.assertEqual(0, db.foo.count())
@@ -1364,7 +1364,7 @@ class TestCollection(unittest.TestCase):
 
         self.assertEqual(10, db.test.count())
 
-        db.test.rename("foo")
+        db.test.really_rename("foo")
 
         self.assertEqual(0, db.test.count())
         self.assertEqual(10, db.foo.count())
@@ -1375,8 +1375,8 @@ class TestCollection(unittest.TestCase):
             x += 1
 
         db.test.insert({})
-        self.assertRaises(OperationFailure, db.foo.rename, "test")
-        db.foo.rename("test", dropTarget=True)
+        self.assertRaises(OperationFailure, db.foo.really_rename, "test")
+        db.foo.really_rename("test", dropTarget=True)
 
     # doesn't really test functionality, just that the option is set correctly
     def test_snapshot(self):
@@ -1531,7 +1531,7 @@ class TestCollection(unittest.TestCase):
         self.db.drop_collection("test")
         self.db.test.save({"x": 1})
         self.db.test.save({"x": 2})
-        self.db.test.create_index("x")
+        self.db.test.really_create_index("x")
 
         self.assertEqual(1, len(list(self.db.test.find({"$min": {"x": 2},
                                                         "$query": {}}))))
@@ -1664,7 +1664,7 @@ class TestCollection(unittest.TestCase):
 
     def test_drop_indexes_non_existant(self):
         self.db.drop_collection("test")
-        self.db.test.drop_indexes()
+        self.db.test.really_drop_indexes()
 
     # This is really a bson test but easier to just reproduce it here...
     # (Shame on me)
@@ -1676,7 +1676,7 @@ class TestCollection(unittest.TestCase):
 
     def test_as_class(self):
         c = self.db.test
-        c.drop()
+        c.really_drop()
         c.insert({"x": 1})
 
         doc = c.find().next()
@@ -1696,7 +1696,7 @@ class TestCollection(unittest.TestCase):
 
     def test_find_and_modify(self):
         c = self.db.test
-        c.drop()
+        c.really_drop()
         c.insert({'_id': 1, 'i': 1})
 
         self.assertEqual({'_id': 1, 'i': 1},
@@ -1760,7 +1760,7 @@ class TestCollection(unittest.TestCase):
 
     def test_find_and_modify_with_sort(self):
         c = self.db.test
-        c.drop()
+        c.really_drop()
         for j in xrange(5):
             c.insert({'j': j, 'i': 0})
 
@@ -1810,7 +1810,7 @@ class TestCollection(unittest.TestCase):
         if not version.at_least(self.db.connection, (2, 0, 0)):
             raise SkipTest("nested $and and $or requires MongoDB >= 2.0")
         c = self.db.test
-        c.drop()
+        c.really_drop()
         c.insert([{'i': i} for i in range(5)])  # [0, 1, 2, 3, 4]
         self.assertEqual(
             [2],
@@ -1867,7 +1867,7 @@ class TestCollection(unittest.TestCase):
         db = self.client.pymongo_test
         db.add_son_manipulator(IncByTwo())
         c = db.test
-        c.drop()
+        c.really_drop()
         c.insert({'foo': 0})
         self.assertEqual(2, c.find_one()['foo'])
         self.assertEqual(0, c.find_one(manipulate=False)['foo'])
@@ -1879,7 +1879,7 @@ class TestCollection(unittest.TestCase):
             raise SkipTest("No uuid module")
 
         coll = self.client.pymongo_test.uuid
-        coll.drop()
+        coll.really_drop()
 
         def change_subtype(collection, subtype):
             collection.uuid_subtype = subtype
@@ -1961,7 +1961,7 @@ class TestCollection(unittest.TestCase):
                                       )['value']['i'])
 
         # Test (inline)_map_reduce
-        coll.drop()
+        coll.really_drop()
         coll.insert({"_id": uu, "x": 1, "tags": ["dog", "cat"]})
         coll.insert({"_id": uuid.uuid4(), "x": 3,
                      "tags": ["mouse", "cat", "dog"]})
@@ -1999,7 +1999,7 @@ class TestCollection(unittest.TestCase):
         self.assertEqual(2, db.results.count())
 
         db.drop_collection("result")
-        coll.drop()
+        coll.really_drop()
 
         # Test group
         coll.insert({"_id": uu, "a": 2})
