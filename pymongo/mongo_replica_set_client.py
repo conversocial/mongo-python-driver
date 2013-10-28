@@ -203,7 +203,9 @@ class Member(object):
         self.update(ismaster_response, ping_time)
 
     def update(self, ismaster_response, ping_time):
-        if ismaster_response['ismaster']:
+        if "setName" not in ismaster_response:
+            self.state = OTHER
+        elif ismaster_response['ismaster']:
             self.state = PRIMARY
         elif ismaster_response.get('secondary'):
             self.state = SECONDARY
